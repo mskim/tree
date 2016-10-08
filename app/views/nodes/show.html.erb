@@ -1,0 +1,28 @@
+
+<div id="breadcrumbs">
+	<string>breadcrumbs:</string>
+  <% @node.ancestors.each do |node| %>
+    <%= link_to node.name, node %> &gt;
+  <% end %>
+</div>
+
+<div id="tree">
+	<%= nested_nodes @node.children.arrange(:order => :created_at) %>
+</div>
+
+<div class="page_content">
+	<h1><%= @node.name %></h1>
+	<% if @node.kind == "book" || @node.kind == "part" %>
+	<p>it a book</p>
+	<% elsif @node.kind == "part" %>
+		<p>it a part</p>
+	<% elsif @node.kind == "document" %>
+		<p><img src = "<%= @node.pdf_image_path %>" width="100%" style="padding-top:30px"></img></p>	
+		
+	<% elsif @node.kind == "sub-document" %>
+		<p><img src = "<%= @node.pdf_image_path %>" width="100%" style="padding-top:30px"></img></p>	
+		
+	<% end %>
+	<%= link_to 'Edit', edit_node_path(@node) %> |
+	<%= link_to 'Back', nodes_path %>
+</div>

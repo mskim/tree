@@ -1,0 +1,14 @@
+# Read about fixtures at
+# http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  kind: MyString
+  ancestry: MyString
+  book_id: 1
+
+two:
+  name: MyString
+  kind: MyString
+  ancestry: MyString
+  book_id: 1
