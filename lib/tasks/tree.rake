@@ -1,5 +1,22 @@
 
 namespace :tree do
+  
+  desc "Parse csv into books, by creating nodes and folders."
+  task :parse_book =>:environment do
+    puts "parsing csv..."
+    Book.all.each do |book|
+      book.parse_csv
+    end
+  end
+  
+  desc "Update page number."
+  task :update_page_number =>:environment do
+    puts "parsing csv..."
+    Book.all.each do |book|
+      book.update_page_number
+    end
+  end
+  
   desc "Copy template from library to current project."
   task :copy_template =>:environment do
     puts "copying templates from library"
