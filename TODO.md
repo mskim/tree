@@ -1,15 +1,8 @@
 TODO
-	- skip blank rows of csv when parsing
-	CSV.open(import_file, skip_blanks: true).reject { |row| row.all?(&:nil?) }
-	
-	CSV.parse(import_file, headers: true, skip_blanks: true).delete_if { |row| row.to_hash.values.all?(&:blank?) }
 
-	CSV.open(import_file, skip_blanks: true, headers: true).reject { |row| row.to_hash.values.all?(&:nil?) }
-
-	CSV.readlines(import_file, skip_blanks: true, headers: true).reject { |row| row.to_hash.values.all?(&:nil?) }
-	
 	- flipbook viewing
-	- rake file dependency on either layout.rb or stroy.md
+		add flipbook in part
+		
 	- RemoteStory
 	- generate TOC content
 	- sample book with 
@@ -19,16 +12,45 @@ TODO
 		forward
 		preface
 		chapters
-			Heading
-			QuoteBox
-			Header
-			Footer
+			heading
+			quoteBox
+			header
+			footer
+			footnote
 		index
-		
+
+2016 10 9
+	- toc_node
+	- front_nodes
+	- body_nodes
+	- rear_nodes
+	- update_starting_page
+	- update_toc
+	
 2016 10 8
-	- fix node parse_csv 
+	- fix parse_csv in Book Model
 	- update page_number
-	- 
+	- skip blank rows of csv when parsing
+	- all?
+	check if first 3 column are empty?, it calls v.to_s.empty? for fixnum values
+	@csv = CSV.parse(import_file, headers: true, skip_blanks: true).delete_if do |row|  
+      row.to_hash.values[0..2]all?{|v| v.to_s.empty?}
+    
+		CSV.open(import_file, skip_blanks: true).reject { |row| row.all?(&:nil?) }
+		CSV.parse(import_file, headers: true, skip_blanks: true).delete_if { |row| row.to_hash.values.all?(&:blank?) }
+		CSV.open(import_file, skip_blanks: true, headers: true).reject { |row| row.to_hash.values.all?(&:nil?) }
+		CSV.readlines(import_file, skip_blanks: true, headers: true).reject { |row| row.to_hash.values.all?(&:nil?) }
+	
+	- rake file dependency on either layout.rb or stroy.md
+		task :default => :pdf
+		source_files = Dir.glob("#{File.dirname(__FILE__)}/*.md")
+		task :pdf => source_files.map {|source_file| File.dirname(source_file) + "/output.pdf"}
+		source_files.each do |source_file|
+		  pdf_file = File.dirname(source_file) + "/output.pdf"
+		  file pdf_file => [source_file, "*.rb"] do
+		    sh "/Applications/nr_chapter.app/Contents/MacOS/nr_chapter . "
+		  end
+		end
 2016 9 30
 	- add flipbook viewing
 	- update node

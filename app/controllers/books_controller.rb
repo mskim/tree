@@ -1,5 +1,5 @@
 class BooksController < ApplicationController
-  before_action :set_book, only: [:show, :edit, :update, :destroy]
+  before_action :set_book, only: [:show, :edit, :update, :flipbook, :destroy]
 
   # GET /books
   # GET /books.json
@@ -50,7 +50,16 @@ class BooksController < ApplicationController
       end
     end
   end
-
+  
+  def flipbook
+    @documents = @book.documents
+  end
+  
+  # download output.pdf
+  # def download_pdf
+  #   send_file @book.pdf_merged_path, :type=>'application/pdf', :x_sendfile=>true, :disposition => "attachment"    
+  # end
+  
   # DELETE /books/1
   # DELETE /books/1.json
   def destroy

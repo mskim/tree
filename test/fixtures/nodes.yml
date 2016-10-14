@@ -4,11 +4,11 @@
 one:
   name: MyString
   kind: MyString
-  ancestry: MyString
+  ancestry: 1
   book_id: 1
 
 two:
   name: MyString
   kind: MyString
-  ancestry: MyString
+  ancestry: 1
   book_id: 1

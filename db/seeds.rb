@@ -1,72 +1,21 @@
 book_plan_csv=<<EOF
-Part,Document,Sub-Document,Template,Page,Color,Items,,,
-front,Cover,,cover,2,,,,,
-,Preface,,preface,2,,,,,
-,Structure And ,,structure,2,,,,,
-PART1 어법,PART1 Cover,,part_cover,2,Green,,,,
-,01 주어와 동사의 파악,,nr_chapter,,Green,,,,
-,02 수의 일치,,nr_chapter,,Green,,,,
-,03 가주어와 가목적어,,nr_chapter,,Green,,,,
-,,어법 Semi Test 01,nr_test,,Green,,,,
-,04 자동사와 타동사,,nr_chapter,,Green,,,,
-,05 능동태와 수동태,,nr_chapter,,Green,,,,
-,06 사역동사와 지각동사,,nr_chapter,,Green,,,,
-,07 주의해야 할 조동사 용법,,nr_chapter,,Green,,,,
-,,어법 Semi Test 02,nr_test,,Green,,,,
-,08 완료시제,,nr_chapter,,Green,,,,
-,09 시제일치,,nr_chapter,,Green,,,,
-,10 가정법,,nr_chapter,,Green,,,,
-,,어법 Semi Test 03,nr_test,,Green,,,,
-,11 to부정사와 동명사(1),,nr_chapter,,Green,,,,
-,12 to부정사와 동명사(1),,nr_chapter,,Green,,,,
-,13 현재분사와 과거분사,,nr_chapter,,Green,,,,
-,14 분사구분,,nr_chapter,,Green,,,,
-,,어법 Semi Test 04,nr_test,,Green,,,,
-,15 관계사의 용법,,nr_chapter,,Green,,,,
-,16 주의해야 할 관계사 구분,,nr_chapter,,Green,,,,
-,17 접속사와 전치사,,nr_chapter,,Green,,,,
-,,어법 Semi Test 05,nr_test,,Green,,,,
-,18 대병사,,nr_chapter,,Green,,,,
-,19 형용사와 부사(1),,nr_chapter,,Green,,,,
-,20 형용사와 부사(2),,nr_chapter,,Green,,,,
-,21 비교구문,,nr_chapter,,Green,,,,
-,,어법 Semi Test 06,nr_test,,Green,,,,
-,22 병력구조,,nr_chapter,,Green,,,,
-,23 어순,,nr_chapter,,Green,,,,
-,24 도치,,nr_chapter,,Green,,,,
-,,어법 Mid Test 01,nr_test,,Green,,,,
-,,어법 Mid Test 02,nr_test,,Green,,,,
-,,어법 Mid Test 03,nr_test,,Green,,,,
-,,어법 Mid Test 04,nr_test,,Green,,,,
-,,어법 Mid Test 05,nr_test,,Green,,,,
-,,어법 Mid Test 06,nr_test,,Green,,,,
-PART2 어휘,PART2 Cover,,part_cover,2,Blue,,,,
-,어휘 유형 접근법,,nr_chapter,,Blue,,,,
-,수능 출제 예상 어휘,,nr_chapter,,Blue,,,,
-,,어휘 Semi Test,nr_test,,Blue,,,,
-,,어휘 Mid Test 01,nr_test,,Blue,,,,
-,,어휘 Mid Test 02,nr_test,,Blue,,,,
-,,어휘 Mid Test 03,nr_test,,Blue,,,,
-,,어휘 Mid Test 04,nr_test,,Blue,,,,
-,,어휘 Mid Test 05,nr_test,,Blue,,,,
-,,어휘 Mid Test 06,nr_test,,Blue,,,,
-PART3 어휘,PART3 Cover,,part_cover,2,Brown,,,,
-,,Final Test 01,nr_test,,Brown,,,,
-,,Final Test 02,nr_test,,Brown,,,,
-,,Final Test 03,nr_test,,Brown,,,,
-,,Final Test 04,nr_test,,Brown,,,,
-,,Final Test 05,nr_test,,Brown,,,,
-,,Final Test 06,nr_test,,Brown,,,,
-,,Final Test 07,nr_test,,Brown,,,,
-,,Final Test 08,nr_test,,Brown,,,,
-,,Final Test 09,nr_test,,Brown,,,,
-,,Final Test 10,nr_test,,Brown,,,,
-,,Final Test 11,nr_test,,Brown,,,,
-,,Final Test 12,nr_test,,Brown,,,,
-,,Final Test 13,nr_test,,Brown,,,,
-,,Final Test 14,nr_test,,Brown,,,,
-,,Final Test 15,nr_test,,Brown,,,,
-,,Final Test 16,nr_test,,Brown,,,,
+part,document,sub-document,template,page
+front,cover,,cover,2
+,preface,,preface,1
+,forward,,forward,1
+,toc,,toc,2
+body,01-chapter,,chapter,10
+,02-chapter,,chapter,10
+,,photo-1,photo,4
+,03-chapter,,chapter,10
+,04-chapter,,chapter,10
+,05-chapter,,chapter,10
+,06-chapter,,chapter,10
+,07-chapter,,chapter,10
+,06-chapter,,chapter,10
+,09-chapter,,chapter,10
+,10-chapter,,chapter,10
+rear,index,,index,2
 EOF
 
-Book.where(title: "Sample Book", book_plan: book_plan_csv).first_or_create
+Book.where(title: "Pastor And Texi Driver", book_plan: book_plan_csv).first_or_create

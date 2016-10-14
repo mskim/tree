@@ -15,25 +15,28 @@ class Node < ActiveRecord::Base
   def md_path
     path + "/#{id}.md"
   end
-
+  
+  def sub_document_total_page
+    return 0 if children.length == 0
+    children.collect{|c| c.page_count}.reduce(:+)
+  end
+  
+  def total_page_count
+    page_count + sub_document_total_page
+  end
+  
   def pdf_image_path
     "/#{ancestry}/#{id}/output.pdf"
   end
   
-  
   def create_job_folders
-    puts __method__
+    return unless template
     FileUtils.mkdir_p(path) unless File.directory?(path)
-    @template_path = "/Users/Shared/SoftwareLab/document_template"
-    #copy content
+    @template_path = "/Users/Shared/SoftwareLab/document_template/#{kind}"
     source = @template_path + "/#{template}"
-    puts "source:#{source}"
     unless File.directory?(source)
       puts "No template #{template} found!!!"
     else
-      puts "coping template...."
-      puts "source:#{source}"
-      puts "path:#{path}"
       system("cp -R #{source}/* #{path}/")
     end
   end
@@ -59,17 +62,22 @@ class Node < ActiveRecord::Base
     end
   end
   
+  def copy_node_text_from(source)
+    unless File.exist?(source)
+      puts "text_source doesn't exit!!!"
+    else
+      text_path = path + "/#{id}.md"
+      system("cp #{source} #{text_path}")
+    end
+  end
+  
   def copy_text
     text_source = "~/Dropbox/text_source/#{id}.md"
     text_source = File.expand_path(text_source)
-    puts "text_source:#{text_source}"
-    puts "File.exist?(text_source):#{File.exist?(text_source)}"
     unless File.exist?(text_source)
       puts "text_source doesn't exit!!!"
     else
-      puts "copying"
       text_path = path + "/#{id}.md"
-      puts "text_path:#{text_path}"
       system("cp #{text_source} #{text_path}")
     end
   end
@@ -131,13 +139,34 @@ EOF
   end
     
   def write_story_file(new_story)
+    return if (kind == 'book' || kind == 'part')
     @story = new_story
     @story_path = @story_path || Dir.glob("#{path}/*.{md,txt}").first
-    puts "@story_path:#{@story_path}"
     File.open(@story_path, 'w'){|f| f.write @story}
-    # end
   end
-  
+    
+  def update_metadata
+    return if (kind == 'book' || kind == 'part')
+    @story_path = @story_path || Dir.glob("#{path}/*.{md,txt}").first
+    new_metadata_hash = {"book_title": @title, title: @name}
+    contents = File.open(@story_path, 'r'){|f| f.read}
+    begin
+      if (md = contents.match(/^(---\s*\n.*?\n?)^(---\s*$\n?)/m))
+        @story_markdown = md.post_match
+        @metadata = YAML.load(md.to_s)
+      end
+    rescue => e
+      puts "YAML Exception reading #filename: #{e.message}"
+    end
+    if @metadata
+      @metadata.merge!(new_metadata_hash)
+      meta_data_yaml = @metadata.to_yaml
+    else
+      meta_data_yaml = @metadata.to_yaml
+    end
+    new_story = meta_data_yaml + "\n---\n" + @story_markdown
+    File.open(story_path, 'w'){|f| f.write new_story}
+  end
   
   def read_design_file
     return @design if @design
@@ -158,8 +187,7 @@ EOF
   end
   
   def generate_pdf
-    if File.exist?(layout_path)
-      system("cd #{path} && rake")
-    end
+    system("cd #{path} && rake") if File.exist?(layout_path)
   end
+  
 end
