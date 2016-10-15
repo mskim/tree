@@ -1,5 +1,5 @@
 class NodesController < ApplicationController
-  before_action :set_node, only: [:show, :edit, :update, :destroy]
+  before_action :set_node, only: [:show, :edit, :update, :flipbook, :destroy]
 
   # GET /nodes
   # GET /nodes.json
@@ -63,6 +63,19 @@ class NodesController < ApplicationController
       end
     end
   end
+
+  def flipbook
+    @flipbook_images = @node.flipbook_images
+  end
+  
+  # download output.pdf
+  # def download_pdf
+  #   send_file @book.pdf_merged_path, :type=>'application/pdf', :x_sendfile=>true, :disposition => "attachment"    
+  # end
+
+
+
+
 
   # DELETE /nodes/1
   # DELETE /nodes/1.json

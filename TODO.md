@@ -1,7 +1,5 @@
 TODO
 
-	- flipbook viewing
-		add flipbook in part
 		
 	- RemoteStory
 	- generate TOC content
@@ -18,6 +16,11 @@ TODO
 			footer
 			footnote
 		index
+
+2016 10 14
+
+	- flipbook viewing
+		add flipbook in each node
 
 2016 10 9
 	- toc_node

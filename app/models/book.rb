@@ -1,5 +1,5 @@
 class Book < ActiveRecord::Base
-  attr_accessor :parts
+  attr_accessor :parts, :segment_list
   after_create :setup,:create_root_node
   has_many :nodes
   
@@ -38,6 +38,10 @@ class Book < ActiveRecord::Base
   
   def body_node
     nodes.first.children.select{|n| n.name =='body'}.first
+  end
+  
+  def chapter_nodes
+    body_node.children
   end
   
   def rear_node
@@ -88,7 +92,6 @@ EOF
   end
   
   def copy_from_source
-    chapter_nodes = body_node.children
     Dir.glob("#{chapter_source_path}/*.{md,markdown}").each_with_index do |m, i|
       chapter_nodes[i].copy_node_text_from(m)
     end
@@ -100,7 +103,9 @@ DOCUMENT_INDEX      = 1
 SUB_DOCUMENT_INDEX  = 2
 TEMPLATE_INDEX      = 3
 PAGE_COUNT_INDEX    = 4
-  
+
+# Maximun number of chapter graups 
+MAX_GROUP           = 4
   # 
   # parsing csv into nodes steps
   # 1. seperate rows into group of parts 
@@ -176,111 +181,7 @@ PAGE_COUNT_INDEX    = 4
     end
     puts "total page count:#{page_number - 1 }"
   end
-  
-  ####################### Flipbook ###############
-  def flipbook_path
-    book_path + "/flipbook"
-  end
-  
-  def flipbook_images_path
-    "#{Rails.root}/public/flipbook/#{id}/images"
-  end
-  
-  def template_js_path
-    "#{Rails.root}/public/flipbook/template/js"
-  end
-  
-  def template_css_path
-    "#{Rails.root}/public/flipbook/template/css"
-  end
-  
-  def flipbook_js_path
-    "#{Rails.root}/public/flipbook/#{id}/js"
-  end
     
-  def flipbook_css_path
-    "#{Rails.root}/public/flipbook/#{id}/css"
-  end
-  
-  def copy_assets_to_flipbook
-    # copy js
-    system("cp -r #{template_js_path} #{flipbook_js_path}") unless File.directory?(flipbook_js_path)
-    # copy css
-    system("cp -r #{template_css_path} #{flipbook_css_path}") unless File.directory?(flipbook_css_path)
-  end
-  
-  def flipbook_html_path
-    flipbook_path + "/index.html"
-  end
-  
-  def flipbook_template_erb_path
-    "#{Rails.root}/public/flipbook/template/index.html.erb"
-  end
-    
-  
-  def collect_flipbook_data
-    flipbook_data = []
-    front_matters.each do |front_matter|
-      if front_matter.preview_images_full_path.length > 0
-        front_matter_folder = flipbook_images_path + "/#{front_matter.kind}"
-        system("mkdir -p #{front_matter_folder}") unless File.directory?(front_matter_folder)
-        @h = {}
-        @h[:title]    = front_matter.kind
-        @h[:preview]  = []
-        # copy preview images to flopbook
-        front_matter.preview_images.each do |image|
-          target = front_matter_folder + "/#{File.basename(image)}"
-          system("cp #{image} #{target}")
-          @h[:preview]  << target
-        end
-        flipbook_data << @h
-      end
-    end
-    chapters.each_with_index do |chapter, i|
-      if chapter.preview_images.length > 0
-        chapter_folder = flipbook_images_path + "/chapter#{i.to_s.rjust(2,'0')}"
-        system("mkdir -p #{chapter_folder}") unless File.directory?(chapter_folder)
-        @h = {}
-        @h[:title]    = chapter.title
-        @h[:preview]  = []
-        # copy preview images to flopbook
-        # puts "chapter.preview_images_full_path:#{chapter.preview_images_full_path}"
-        chapter.preview_images_full_path.each do |image|
-          target = chapter_folder + "/#{File.basename(image)}"
-          system("cp #{image} #{target}")
-          @h[:preview]  << target
-        end      
-        flipbook_data << @h
-      end
-    end
-    rear_matters.each do |rear_matter|
-      if rear_matter.preview_images.length > 0
-        rear_matter_folder = flipbook_images_path + "/#{rear_matter.kind}"
-        system("mkdir -p #{rear_matter_folder}") unless File.directory?(rear_matter_folder)
-        @h = {}
-        @h[:title]    = rear_matter.kind
-        @h[:preview]  = []
-        # copy preview images to flopbook
-        rear_matter.preview_images_full_path.each do |image|
-          target = rear_matter_folder + "/#{File.basename(image)}"
-          system("cp #{image} #{target}")
-          @h[:preview]  << target
-        end
-        flipbook_data << @h
-      end
-    end
-    flipbook_data
-  end
-  
-  def generate_flipbook
-    system("mkdir -p #{flipbook_path}") unless File.directory?(flipbook_path)
-    @flipbook_data  = collect_flipbook_data
-    copy_assets_to_flipbook
-    template_file   = File.open(flipbook_template_erb_path, 'r'){|f| f.read}
-    erb             = ERB.new(template_file)
-    File.open(flipbook_html_path, 'w'){|f| f.write erb.result(binding)}
-  end
-  
   # collect all pdf files into pdf folder
   def collect_pdf
     FileUtils.mkdir_p(pdf_path) unless File.directory?(pdf_path)
@@ -294,5 +195,160 @@ PAGE_COUNT_INDEX    = 4
     #   end
     # end
   end
+
+  ####################### Flipbook ###############
   
+  def flipbook_path
+    book_path + "/flipbook"
+  end
+  
+  def flipbook_images_path
+    "#{flipbook_path}/images"
+  end
+
+  def flipbook_js_path
+    "#{flipbook_path}/js"
+  end
+    
+  def flipbook_css_path
+    "#{flipbook_path}/css"
+  end
+  
+  def flipbook_font_path
+    "#{flipbook_path}/fonts"
+  end
+  def flipbook_html_path
+    "#{flipbook_path}/index.html"
+  end
+  
+  def flipbook_tempate_path
+    "#{Rails.root}/public/flipbook_template"
+  end
+  
+  def template_js_path
+    "#{flipbook_tempate_path}/js"
+  end
+  
+  def template_css_path
+    "#{flipbook_tempate_path}/css"
+  end
+  
+  def template_images_path
+    "#{flipbook_tempate_path}/images"
+  end
+  
+  def template_font_path
+    "#{flipbook_tempate_path}/fonts"
+  end
+  
+  # create downloadable flipbook, a separate grouped web pages with own js and css
+  # index.html, front, chapter 1-3, chapter 4-5, chapter 6-9, rear
+  def generate_flipbook
+    @segment_list             = []
+    setup_flipbook_assets
+    setup_flipbook_front
+    setup_flipbook_chapters
+    setup_flipbook_rear
+    generate_flipbook_html
+  end
+  
+  def setup_flipbook_assets
+    system("mkdir -p #{flipbook_path}") unless File.directory?(flipbook_path) 
+    system("mkdir -p #{flipbook_images_path}") unless File.directory?(flipbook_images_path)
+    system("cp -r #{template_js_path} #{flipbook_js_path}") unless File.directory?(flipbook_js_path)
+    system("cp -r #{template_css_path} #{flipbook_css_path}") unless File.directory?(flipbook_css_path)
+    system("cp -r #{template_font_path} #{flipbook_font_path}") unless File.directory?(flipbook_font_path)
+    
+    
+  end
+
+  def setup_flipbook_front
+    @segment_data         = {}
+    @segment_data[:name]  = "Front"
+    @segment_data[:pages] = []
+    front_folder = flipbook_images_path + "/front"
+    system("mkdir -p #{front_folder}") unless File.directory?(front_folder)
+    front_node.children.each do |node|
+      # copy_previews_to_flipbook and insert_data segment_data[:pages]
+      preview_images      = node.preview_images
+      preview_images.each do |image|
+        target              = flipbook_images_path + "/front/#{node.name}:#{File.basename(image)}"
+        system("cp #{image} #{target}")
+        @segment_data[:pages] << target
+      end
+    end
+    @segment_list << @segment_data
+    
+  end
+
+  def setup_flipbook_chapters
+    body_folder = flipbook_images_path + "/body"
+    system("mkdir -p #{body_folder}") unless File.directory?(body_folder)
+    # separate chapters into groups of MAX_GROUP
+    chapters = chapter_nodes
+    chapter_length = chapters.length
+    if chapter_length > MAX_GROUP
+      chapter_count = chapter_length/MAX_GROUP
+      if chapter_length % MAX_GROUP > 0
+        chapter_count += 1
+      end
+    else
+      chapter_length = chapter_length
+    end
+    chapter_number = 1
+    chapters.each_slice(MAX_GROUP).each_with_index do |chapter_group, i|
+      stating         = i*chapter_count + 1
+      ending          = stating + chapter_count - 1
+      name            = "chapters:#{stating}-#{ending}"
+      @segment_data   = {}
+      @segment_data[:name]  =  name
+      @segment_data[:pages] = []
+      chapter_group.each_with_index do |chapter,j|
+        chapter.preview_images.each do |image|
+          target = flipbook_images_path + "/body/#{chapter_number}-#{File.basename(image)}"
+          system("cp #{image} #{target}")
+          @segment_data[:pages] << target
+        end
+        chapter_number += 1
+        # TODO what if sub_doc images come before or middle of chapter
+
+      end
+      @segment_list << @segment_data
+    end
+  end
+  
+  def setup_flipbook_rear
+    @segment_data         = {}
+    @segment_data[:name]  = "Rear"
+    @segment_data[:pages] = []
+    rear_folder = flipbook_images_path + "/rear"
+    system("mkdir -p #{rear_folder}") unless File.directory?(rear_folder)
+    rear_node.children.each do |node|
+      preview_images      = node.preview_images
+      preview_images.each do |image|
+        target              = flipbook_images_path + "/rear/#{node.name}:#{File.basename(image)}"
+        system("cp #{image} #{target}")
+        @segment_data[:pages] << target
+      end
+    end
+    @segment_list << @segment_data if @segment_data[:pages].length > 0
+  end
+  
+  def generate_flipbook_html
+    @book_title = title
+    @segment_list.each_with_index do |segment, i|
+      @segment
+      html_erb        = flipbook_tempate_path + "/index.html.erb"
+      template_file   = File.open(html_erb, 'r'){|f| f.read}
+      puts "+++++++++ segment:#{segment}"
+      erb             = ERB.new(template_file)
+      html            = erb.result(binding)
+      if i == 0
+        html_path       = flipbook_path + "/index.html"
+      else
+        html_path       = flipbook_path + "/index#{i}.html"
+      end
+      File.open(html_path, 'w'){|f| f.write html}
+    end
+  end
 end

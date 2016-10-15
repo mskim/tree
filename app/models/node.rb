@@ -25,15 +25,23 @@ class Node < ActiveRecord::Base
     page_count + sub_document_total_page
   end
   
+  def pdf_full_path
+    path + "/output.pdf"
+  end
+  
+  # relative path from #{Rails.root}/public
   def pdf_image_path
     "/#{ancestry}/#{id}/output.pdf"
+  end
+    
+  def template_path
+    "/Users/Shared/SoftwareLab/document_template/#{kind}"
   end
   
   def create_job_folders
     return unless template
     FileUtils.mkdir_p(path) unless File.directory?(path)
-    @template_path = "/Users/Shared/SoftwareLab/document_template/#{kind}"
-    source = @template_path + "/#{template}"
+    source = template_path + "/#{template}"
     unless File.directory?(source)
       puts "No template #{template} found!!!"
     else
@@ -42,7 +50,6 @@ class Node < ActiveRecord::Base
   end
   
   def copy_rakefile
-    template_path = "/Users/Shared/SoftwareLab/document_template"
     source        = template_path + "/#{template}/Rakefile"
     rake_path     = path + "/Rakefile"
     unless File.exist?(source)
@@ -53,8 +60,7 @@ class Node < ActiveRecord::Base
   end
   
   def copy_design
-    @template_path  = "/Users/Shared/SoftwareLab/document_template"
-    source          = @template_path + "/#{template}/layout.rb"
+    source          = template_path + "/#{template}/layout.rb"
     unless File.exist?(source)
       puts " #{source} not found!!!"
     else
@@ -182,12 +188,43 @@ EOF
     # end
   end
   
-  def images
-    
-  end
-  
   def generate_pdf
     system("cd #{path} && rake") if File.exist?(layout_path)
+  end
+  
+  def pdf_collection
+    collection = []
+    if kind == "document" || kind == "sub-document"
+      collection << pdf_full_path if File.exist?(pdf_full_path)
+    end
+    if children.length > 0
+      children.each do |child|
+        collection += child.pdf_collection
+      end
+    end
+    collection
+  end
+  
+  ################# Flipbook relateed #############
+  
+  
+  def preview_images
+    Dir.glob("#{path}/preview/*.jpg")
+  end
+  
+  # full_path of preview images of itself and its children images
+  def subtree_preview_images
+    subtree_images = preview_images
+    if children.length > 0
+      children.each do |child|
+        subtree_images += child.subtree_preview_images
+      end
+    end
+    subtree_images
+  end
+  
+  def book_flipbook_path
+    book.flipbook_path
   end
   
 end

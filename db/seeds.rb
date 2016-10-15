@@ -18,4 +18,4 @@ body,01-chapter,,chapter,10
 rear,index,,index,2
 EOF
 
-Book.where(title: "Pastor And Texi Driver", book_plan: book_plan_csv).first_or_create
+Book.where(title: "Pastor And Texi Driver", kind: 'paperback', book_plan: book_plan_csv).first_or_create
