@@ -270,11 +270,13 @@ MAX_GROUP           = 4
     system("mkdir -p #{front_folder}") unless File.directory?(front_folder)
     front_node.children.each do |node|
       # copy_previews_to_flipbook and insert_data segment_data[:pages]
-      preview_images      = node.preview_images
+      preview_images        = node.preview_images
       preview_images.each do |image|
-        target              = flipbook_images_path + "/front/#{node.name}:#{File.basename(image)}"
+        relative_path       = "/front/#{node.name}:#{File.basename(image)}"
+        target              = flipbook_images_path + relative_path
         system("cp #{image} #{target}")
-        @segment_data[:pages] << target
+        flipbook_page_path  = "images" + relative_path
+        @segment_data[:pages] << flipbook_page_path
       end
     end
     @segment_list << @segment_data
@@ -305,9 +307,11 @@ MAX_GROUP           = 4
       @segment_data[:pages] = []
       chapter_group.each_with_index do |chapter,j|
         chapter.preview_images.each do |image|
-          target = flipbook_images_path + "/body/#{chapter_number}-#{File.basename(image)}"
+          relative_path       = "/body/#{chapter_number}-#{File.basename(image)}"
+          target              = flipbook_images_path + relative_path
           system("cp #{image} #{target}")
-          @segment_data[:pages] << target
+          flipbook_page_path  = "images" + relative_path
+          @segment_data[:pages] << flipbook_page_path
         end
         chapter_number += 1
         # TODO what if sub_doc images come before or middle of chapter
@@ -326,9 +330,11 @@ MAX_GROUP           = 4
     rear_node.children.each do |node|
       preview_images      = node.preview_images
       preview_images.each do |image|
-        target              = flipbook_images_path + "/rear/#{node.name}:#{File.basename(image)}"
+        relative_path       = "/rear/#{node.name}:#{File.basename(image)}"
+        target              = flipbook_images_path + relative_path
         system("cp #{image} #{target}")
-        @segment_data[:pages] << target
+        flipbook_page_path  = "images" + relative_path
+        @segment_data[:pages] << flipbook_page_path
       end
     end
     @segment_list << @segment_data if @segment_data[:pages].length > 0
@@ -337,10 +343,10 @@ MAX_GROUP           = 4
   def generate_flipbook_html
     @book_title = title
     @segment_list.each_with_index do |segment, i|
-      @segment
+      @segment        = segment
+      @paired_page    = @segment[:pages].each_slice(2).map{|e| e}
       html_erb        = flipbook_tempate_path + "/index.html.erb"
       template_file   = File.open(html_erb, 'r'){|f| f.read}
-      puts "+++++++++ segment:#{segment}"
       erb             = ERB.new(template_file)
       html            = erb.result(binding)
       if i == 0
